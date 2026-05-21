@@ -6,6 +6,10 @@ import { TransportRoute } from './entities/transport-route.entity';
 import { TransportVehicle } from './entities/transport-vehicle.entity';
 import { TransportStoppage } from './entities/transport-stoppage.entity';
 import { TransportAssign } from './entities/transport-assign.entity';
+import { CreateTransportRouteDto } from './dto/create-transport-route.dto';
+import { CreateVehicleDto } from './dto/create-vehicle.dto';
+import { CreateStoppageDto } from './dto/create-stoppage.dto';
+import { AssignStudentDto } from './dto/assign-student.dto';
 
 @Injectable()
 export class TransportService {
@@ -20,7 +24,7 @@ export class TransportService {
     private readonly assignRepo: Repository<TransportAssign>,
   ) {}
 
-  async createRoute(dto: Partial<TransportRoute>): Promise<TransportRoute> {
+  async createRoute(dto: CreateTransportRouteDto): Promise<TransportRoute> {
     return this.routeRepo.save(this.routeRepo.create(dto));
   }
 
@@ -37,7 +41,7 @@ export class TransportService {
 
   async updateRoute(
     id: number,
-    dto: Partial<TransportRoute>,
+    dto: Partial<CreateTransportRouteDto>,
   ): Promise<TransportRoute> {
     const route = await this.findRoute(id);
     Object.assign(route, dto);
@@ -49,9 +53,7 @@ export class TransportService {
     await this.routeRepo.remove(route);
   }
 
-  async createVehicle(
-    dto: Partial<TransportVehicle>,
-  ): Promise<TransportVehicle> {
+  async createVehicle(dto: CreateVehicleDto): Promise<TransportVehicle> {
     return this.vehicleRepo.save(this.vehicleRepo.create(dto));
   }
 
@@ -68,7 +70,7 @@ export class TransportService {
 
   async updateVehicle(
     id: number,
-    dto: Partial<TransportVehicle>,
+    dto: Partial<CreateVehicleDto>,
   ): Promise<TransportVehicle> {
     const vehicle = await this.findVehicle(id);
     Object.assign(vehicle, dto);
@@ -80,8 +82,7 @@ export class TransportService {
     await this.vehicleRepo.remove(vehicle);
   }
 
-  // Stoppages
-  createStoppage(dto: any) {
+  createStoppage(dto: CreateStoppageDto) {
     return this.stoppageRepo.save(this.stoppageRepo.create(dto));
   }
 
@@ -92,7 +93,7 @@ export class TransportService {
     return this.stoppageRepo.find({ where, order: { name: 'ASC' } });
   }
 
-  async updateStoppage(id: number, dto: any) {
+  async updateStoppage(id: number, dto: Partial<CreateStoppageDto>) {
     const s = await this.stoppageRepo.findOneBy({ id });
     if (!s) throw new NotFoundException('Stoppage not found');
     return this.stoppageRepo.save({ ...s, ...dto });
@@ -104,8 +105,7 @@ export class TransportService {
     return this.stoppageRepo.remove(s);
   }
 
-  // Student Assignments
-  assignStudent(dto: any) {
+  assignStudent(dto: AssignStudentDto) {
     return this.assignRepo.save(this.assignRepo.create(dto));
   }
 

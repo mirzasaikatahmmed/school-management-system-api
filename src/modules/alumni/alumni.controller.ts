@@ -27,6 +27,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/roles.enum';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
+import { CreateAlumniDto } from './dto/create-alumni.dto';
 
 @ApiTags('Alumni')
 @ApiBearerAuth('access-token')
@@ -39,22 +40,8 @@ export class AlumniController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Alumni record created')
   @ApiOperation({ summary: 'Add an alumni record' })
-  @ApiBody({
-    schema: {
-      properties: {
-        studentId: { type: 'number' },
-        fullName: { type: 'string', example: 'Rakib Hasan' },
-        email: { type: 'string' },
-        phone: { type: 'string' },
-        passingYear: { type: 'number', example: 2024 },
-        occupation: { type: 'string' },
-        address: { type: 'string' },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['fullName'],
-    },
-  })
-  create(@Body() dto: any) {
+  @ApiBody({ type: CreateAlumniDto })
+  create(@Body() dto: CreateAlumniDto) {
     return this.service.create(dto);
   }
 
@@ -86,7 +73,8 @@ export class AlumniController {
   @ForgeMessage('Alumni updated')
   @ApiOperation({ summary: 'Update alumni record' })
   @ApiParam({ name: 'id', type: Number })
-  update(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateAlumniDto })
+  update(@Param('id', ParseIntIdPipe) id: number, @Body() dto: CreateAlumniDto) {
     return this.service.update(id, dto);
   }
 

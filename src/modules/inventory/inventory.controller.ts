@@ -28,6 +28,10 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/roles.enum';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
+import { CreateInventoryCategoryDto } from './dto/create-inventory-category.dto';
+import { CreateProductDto } from './dto/create-product.dto';
+import { AddStockDto } from './dto/add-stock.dto';
+import { IssueStockDto } from './dto/issue-stock.dto';
 
 @ApiTags('Inventory')
 @ApiBearerAuth('access-token')
@@ -40,16 +44,8 @@ export class InventoryController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Category created')
   @ApiOperation({ summary: 'Create an inventory category' })
-  @ApiBody({
-    schema: {
-      properties: {
-        name: { type: 'string', example: 'Stationery' },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['name'],
-    },
-  })
-  createCategory(@Body() dto: any) {
+  @ApiBody({ type: CreateInventoryCategoryDto })
+  createCategory(@Body() dto: CreateInventoryCategoryDto) {
     return this.service.createCategory(dto);
   }
 
@@ -75,20 +71,8 @@ export class InventoryController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Product created')
   @ApiOperation({ summary: 'Add an inventory product' })
-  @ApiBody({
-    schema: {
-      properties: {
-        name: { type: 'string', example: 'Whiteboard Marker' },
-        categoryId: { type: 'number', example: 1 },
-        purchasePrice: { type: 'number', example: 50 },
-        salePrice: { type: 'number', example: 70 },
-        currentStock: { type: 'number', example: 100 },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['name'],
-    },
-  })
-  createProduct(@Body() dto: any) {
+  @ApiBody({ type: CreateProductDto })
+  createProduct(@Body() dto: CreateProductDto) {
     return this.service.createProduct(dto);
   }
 
@@ -112,7 +96,11 @@ export class InventoryController {
   @ForgeMessage('Product updated')
   @ApiOperation({ summary: 'Update a product' })
   @ApiParam({ name: 'id', type: Number })
-  updateProduct(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateProductDto })
+  updateProduct(
+    @Param('id', ParseIntIdPipe) id: number,
+    @Body() dto: CreateProductDto,
+  ) {
     return this.service.updateProduct(id, dto);
   }
 
@@ -131,13 +119,8 @@ export class InventoryController {
   @ForgeMessage('Stock added')
   @ApiOperation({ summary: 'Add stock for a product (purchase)' })
   @ApiParam({ name: 'id', type: Number })
-  @ApiBody({
-    schema: {
-      properties: { quantity: { type: 'number', example: 50 } },
-      required: ['quantity'],
-    },
-  })
-  addStock(@Param('id', ParseIntIdPipe) id: number, @Body() body: any) {
+  @ApiBody({ type: AddStockDto })
+  addStock(@Param('id', ParseIntIdPipe) id: number, @Body() body: AddStockDto) {
     return this.service.addStock(id, body.quantity);
   }
 
@@ -145,20 +128,8 @@ export class InventoryController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Stock issued')
   @ApiOperation({ summary: 'Issue stock to a department/person' })
-  @ApiBody({
-    schema: {
-      properties: {
-        productId: { type: 'number', example: 1 },
-        quantity: { type: 'number', example: 5 },
-        issueDate: { type: 'string', example: '2025-05-05' },
-        issuedTo: { type: 'string', example: 'Science Lab' },
-        note: { type: 'string' },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['productId', 'quantity', 'issueDate'],
-    },
-  })
-  issueStock(@Body() dto: any, @CurrentUser() user: any) {
+  @ApiBody({ type: IssueStockDto })
+  issueStock(@Body() dto: IssueStockDto, @CurrentUser() user: any) {
     return this.service.issueStock(dto, user.id);
   }
 

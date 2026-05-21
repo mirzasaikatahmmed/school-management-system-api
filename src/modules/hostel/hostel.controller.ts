@@ -27,6 +27,10 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/roles.enum';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
+import { CreateHostelDto } from './dto/create-hostel.dto';
+import { CreateHostelRoomDto } from './dto/create-hostel-room.dto';
+import { CreateHostelCategoryDto } from './dto/create-hostel-category.dto';
+import { AllocateStudentDto } from './dto/allocate-student.dto';
 
 @ApiTags('Hostel')
 @ApiBearerAuth('access-token')
@@ -39,20 +43,8 @@ export class HostelController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Hostel created')
   @ApiOperation({ summary: 'Create a hostel' })
-  @ApiBody({
-    schema: {
-      properties: {
-        name: { type: 'string', example: 'Boys Hostel' },
-        categoryId: { type: 'number', example: 1 },
-        address: { type: 'string', example: 'School Campus' },
-        watchman: { type: 'string', example: 'Rahim' },
-        remarks: { type: 'string' },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['name', 'categoryId', 'address', 'watchman'],
-    },
-  })
-  createHostel(@Body() dto: any) {
+  @ApiBody({ type: CreateHostelDto })
+  createHostel(@Body() dto: CreateHostelDto) {
     return this.hostelService.createHostel(dto);
   }
 
@@ -69,7 +61,11 @@ export class HostelController {
   @ForgeMessage('Hostel updated')
   @ApiOperation({ summary: 'Update a hostel' })
   @ApiParam({ name: 'id', type: Number })
-  updateHostel(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateHostelDto })
+  updateHostel(
+    @Param('id', ParseIntIdPipe) id: number,
+    @Body() dto: CreateHostelDto,
+  ) {
     return this.hostelService.updateHostel(id, dto);
   }
 
@@ -87,21 +83,8 @@ export class HostelController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Room created')
   @ApiOperation({ summary: 'Create a hostel room' })
-  @ApiBody({
-    schema: {
-      properties: {
-        name: { type: 'string', example: 'Room-101' },
-        hostelId: { type: 'number', example: 1 },
-        noBeds: { type: 'number', example: 4 },
-        bedFee: { type: 'number', example: 500 },
-        categoryId: { type: 'number' },
-        remarks: { type: 'string' },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['name', 'hostelId', 'noBeds', 'bedFee'],
-    },
-  })
-  createRoom(@Body() dto: any) {
+  @ApiBody({ type: CreateHostelRoomDto })
+  createRoom(@Body() dto: CreateHostelRoomDto) {
     return this.hostelService.createRoom(dto);
   }
 
@@ -125,7 +108,11 @@ export class HostelController {
   @ForgeMessage('Room updated')
   @ApiOperation({ summary: 'Update a room' })
   @ApiParam({ name: 'id', type: Number })
-  updateRoom(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateHostelRoomDto })
+  updateRoom(
+    @Param('id', ParseIntIdPipe) id: number,
+    @Body() dto: CreateHostelRoomDto,
+  ) {
     return this.hostelService.updateRoom(id, dto);
   }
 
@@ -143,16 +130,8 @@ export class HostelController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Hostel category created')
   @ApiOperation({ summary: 'Create a hostel category' })
-  @ApiBody({
-    schema: {
-      properties: {
-        name: { type: 'string', example: 'Boys' },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['name'],
-    },
-  })
-  createCategory(@Body() dto: any) {
+  @ApiBody({ type: CreateHostelCategoryDto })
+  createCategory(@Body() dto: CreateHostelCategoryDto) {
     return this.hostelService.createCategory(dto);
   }
 
@@ -178,21 +157,8 @@ export class HostelController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Student allocated to hostel room')
   @ApiOperation({ summary: 'Allocate a student to a hostel room' })
-  @ApiBody({
-    schema: {
-      properties: {
-        studentId: { type: 'number', example: 5 },
-        hostelId: { type: 'number', example: 1 },
-        roomId: { type: 'number', example: 2 },
-        fromDate: { type: 'string', example: '2025-01-01' },
-        toDate: { type: 'string' },
-        sessionId: { type: 'number', example: 6 },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['studentId', 'hostelId', 'roomId', 'fromDate'],
-    },
-  })
-  allocate(@Body() dto: any) {
+  @ApiBody({ type: AllocateStudentDto })
+  allocate(@Body() dto: AllocateStudentDto) {
     return this.hostelService.allocate(dto);
   }
 

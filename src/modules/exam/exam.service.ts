@@ -6,12 +6,14 @@ import { Exam } from './entities/exam.entity';
 import { ExamTerm } from './entities/exam-term.entity';
 import { Grade } from './entities/grade.entity';
 import { Mark } from './entities/mark.entity';
+import { ExamHall } from './entities/exam-hall.entity';
 import {
   CreateExamDto,
   CreateExamTermDto,
   CreateGradeDto,
   SubmitMarkDto,
 } from './dto/create-exam.dto';
+import { CreateExamHallDto } from './dto/create-exam-hall.dto';
 
 @Injectable()
 export class ExamService {
@@ -24,6 +26,8 @@ export class ExamService {
     private readonly gradeRepo: Repository<Grade>,
     @InjectRepository(Mark)
     private readonly markRepo: Repository<Mark>,
+    @InjectRepository(ExamHall)
+    private readonly hallRepo: Repository<ExamHall>,
   ) {}
 
   async createTerm(dto: CreateExamTermDto): Promise<ExamTerm> {
@@ -97,5 +101,29 @@ export class ExamService {
       if (v !== undefined) where[k] = v;
     });
     return this.markRepo.find({ where });
+  }
+
+  // Exam Halls
+  createHall(dto: CreateExamHallDto): Promise<ExamHall> {
+    return this.hallRepo.save(this.hallRepo.create(dto));
+  }
+
+  getHalls(branchId?: number): Promise<ExamHall[]> {
+    return this.hallRepo.find({
+      where: branchId ? { branchId } : {},
+      order: { hallNo: 'ASC' },
+    });
+  }
+
+  async updateHall(id: number, dto: Partial<CreateExamHallDto>): Promise<ExamHall> {
+    const hall = await this.hallRepo.findOneBy({ id });
+    if (!hall) throw new NotFoundException('Exam hall not found');
+    return this.hallRepo.save({ ...hall, ...dto });
+  }
+
+  async removeHall(id: number): Promise<void> {
+    const hall = await this.hallRepo.findOneBy({ id });
+    if (!hall) throw new NotFoundException('Exam hall not found');
+    await this.hallRepo.remove(hall);
   }
 }

@@ -3,9 +3,12 @@ import {
   Get,
   Post,
   Body,
+  Delete,
   UseGuards,
   Query,
   Param,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,6 +17,7 @@ import {
   ApiParam,
   ApiQuery,
   ApiBody,
+  ApiResponse,
 } from '@nestjs/swagger';
 import { ForgeMessage } from 'nestjs-api-forge';
 import { FeesService } from './fees.service';
@@ -21,6 +25,9 @@ import {
   CreateFeeAllocationDto,
   CollectPaymentDto,
 } from './dto/create-payment.dto';
+import { CreateFeeTypeDto } from './dto/create-fee-type.dto';
+import { CreateFeeGroupDto } from './dto/create-fee-group.dto';
+import { CreateFeeFineDto } from './dto/create-fee-fine.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -47,26 +54,8 @@ export class FeesController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Fee type created')
   @ApiOperation({ summary: 'Create a fee type' })
-  @ApiBody({
-    schema: {
-      properties: {
-        name: { type: 'string', example: 'Monthly Fee' },
-        feeCode: { type: 'string', example: 'monthly-fee' },
-        description: { type: 'string' },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['name', 'feeCode', 'branchId'],
-    },
-  })
-  createFeeType(
-    @Body()
-    dto: {
-      name: string;
-      feeCode: string;
-      description?: string;
-      branchId: number;
-    },
-  ) {
+  @ApiBody({ type: CreateFeeTypeDto })
+  createFeeType(@Body() dto: CreateFeeTypeDto) {
     return this.feesService.createFeeType(dto);
   }
 
@@ -89,26 +78,8 @@ export class FeesController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.ACCOUNTANT)
   @ForgeMessage('Fee group created')
   @ApiOperation({ summary: 'Create a fee group' })
-  @ApiBody({
-    schema: {
-      properties: {
-        name: { type: 'string', example: 'January - Six' },
-        description: { type: 'string' },
-        sessionId: { type: 'number', example: 6 },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['name', 'sessionId', 'branchId'],
-    },
-  })
-  createFeeGroup(
-    @Body()
-    dto: {
-      name: string;
-      description?: string;
-      sessionId: number;
-      branchId: number;
-    },
-  ) {
+  @ApiBody({ type: CreateFeeGroupDto })
+  createFeeGroup(@Body() dto: CreateFeeGroupDto) {
     return this.feesService.createFeeGroup(dto);
   }
 
@@ -156,5 +127,43 @@ export class FeesController {
     @Param('allocationId', ParseIntIdPipe) allocationId: number,
   ) {
     return this.feesService.getPaymentHistory(allocationId);
+  }
+
+  // Fee Fines
+  @Post('fines')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.ACCOUNTANT)
+  @ForgeMessage('Fee fine configured')
+  @ApiOperation({ summary: 'Configure a fine rule for a fee group/type' })
+  @ApiBody({ type: CreateFeeFineDto })
+  createFeeFine(@Body() dto: CreateFeeFineDto) {
+    return this.feesService.createFeeFine(dto);
+  }
+
+  @Get('fines')
+  @ForgeMessage('Fee fines fetched')
+  @ApiOperation({ summary: 'List fee fine configurations' })
+  @ApiQuery({ name: 'groupId', required: false, type: Number })
+  @ApiQuery({ name: 'sessionId', required: false, type: Number })
+  @ApiQuery({ name: 'branchId', required: false, type: Number })
+  getFeeFines(
+    @Query('groupId') groupId?: string,
+    @Query('sessionId') sessionId?: string,
+    @Query('branchId') branchId?: string,
+  ) {
+    return this.feesService.getFeeFines({
+      groupId: groupId ? +groupId : undefined,
+      sessionId: sessionId ? +sessionId : undefined,
+      branchId: branchId ? +branchId : undefined,
+    });
+  }
+
+  @Delete('fines/:id')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Remove a fee fine rule' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: 204 })
+  removeFeeFine(@Param('id', ParseIntIdPipe) id: number) {
+    return this.feesService.removeFeeFine(id);
   }
 }

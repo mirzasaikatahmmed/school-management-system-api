@@ -28,6 +28,7 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/roles.enum';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
+import { CreateAwardDto } from './dto/create-award.dto';
 
 @ApiTags('Awards')
 @ApiBearerAuth('access-token')
@@ -40,21 +41,8 @@ export class AwardController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Award created')
   @ApiOperation({ summary: 'Create an award for student or staff' })
-  @ApiBody({
-    schema: {
-      properties: {
-        title: { type: 'string', example: 'Best Student 2025' },
-        recipientType: { type: 'string', enum: ['student', 'staff'] },
-        recipientId: { type: 'number', example: 5 },
-        description: { type: 'string' },
-        awardDate: { type: 'string', example: '2025-12-15' },
-        branchId: { type: 'number', example: 1 },
-        sessionId: { type: 'number', example: 6 },
-      },
-      required: ['title', 'recipientType', 'recipientId', 'awardDate'],
-    },
-  })
-  create(@Body() dto: any, @CurrentUser() user: any) {
+  @ApiBody({ type: CreateAwardDto })
+  create(@Body() dto: CreateAwardDto, @CurrentUser() user: any) {
     return this.service.create(dto, user.id);
   }
 
@@ -84,7 +72,8 @@ export class AwardController {
   @ForgeMessage('Award updated')
   @ApiOperation({ summary: 'Update an award' })
   @ApiParam({ name: 'id', type: Number })
-  update(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateAwardDto })
+  update(@Param('id', ParseIntIdPipe) id: number, @Body() dto: CreateAwardDto) {
     return this.service.update(id, dto);
   }
 

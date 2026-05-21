@@ -42,7 +42,7 @@ import { AdmissionModule } from './modules/admission/admission.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => config.get('database'),
+      useFactory: (config: ConfigService) => config.get('database')!,
     }),
     ApiForgeModule.forRootAsync({
       imports: [ConfigModule],

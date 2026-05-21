@@ -27,6 +27,10 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/roles.enum';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
+import { CreateSalaryTemplateDto } from './dto/create-salary-template.dto';
+import { AddTemplateDetailDto } from './dto/add-template-detail.dto';
+import { GeneratePayrollDto } from './dto/generate-payroll.dto';
+import { PayPayrollDto } from './dto/pay-payroll.dto';
 
 @ApiTags('Payroll')
 @ApiBearerAuth('access-token')
@@ -39,17 +43,8 @@ export class PayrollController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Salary template created')
   @ApiOperation({ summary: 'Create a salary template' })
-  @ApiBody({
-    schema: {
-      properties: {
-        name: { type: 'string', example: 'Teacher Scale' },
-        basicSalary: { type: 'number', example: 15000 },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['name', 'basicSalary'],
-    },
-  })
-  createTemplate(@Body() dto: any) {
+  @ApiBody({ type: CreateSalaryTemplateDto })
+  createTemplate(@Body() dto: CreateSalaryTemplateDto) {
     return this.service.createTemplate(dto);
   }
 
@@ -66,7 +61,8 @@ export class PayrollController {
   @ForgeMessage('Template updated')
   @ApiOperation({ summary: 'Update a salary template' })
   @ApiParam({ name: 'id', type: Number })
-  updateTemplate(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateSalaryTemplateDto })
+  updateTemplate(@Param('id', ParseIntIdPipe) id: number, @Body() dto: CreateSalaryTemplateDto) {
     return this.service.updateTemplate(id, dto);
   }
 
@@ -85,18 +81,8 @@ export class PayrollController {
   @ForgeMessage('Template detail added')
   @ApiOperation({ summary: 'Add allowance/deduction detail to template' })
   @ApiParam({ name: 'id', type: Number })
-  @ApiBody({
-    schema: {
-      properties: {
-        title: { type: 'string', example: 'House Allowance' },
-        type: { type: 'string', enum: ['allowance', 'deduction'] },
-        amountType: { type: 'string', example: 'fixed' },
-        amount: { type: 'number', example: 2000 },
-      },
-      required: ['title', 'type', 'amount'],
-    },
-  })
-  addDetail(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: AddTemplateDetailDto })
+  addDetail(@Param('id', ParseIntIdPipe) id: number, @Body() dto: AddTemplateDetailDto) {
     return this.service.addTemplateDetail({ ...dto, templateId: id });
   }
 
@@ -122,23 +108,8 @@ export class PayrollController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.ACCOUNTANT)
   @ForgeMessage('Payroll generated')
   @ApiOperation({ summary: 'Generate payroll for a staff member' })
-  @ApiBody({
-    schema: {
-      properties: {
-        staffId: { type: 'number', example: 1 },
-        month: { type: 'number', example: 5 },
-        year: { type: 'number', example: 2025 },
-        basicSalary: { type: 'number', example: 15000 },
-        totalAllowance: { type: 'number', example: 3000 },
-        totalDeduction: { type: 'number', example: 500 },
-        netSalary: { type: 'number', example: 17500 },
-        branchId: { type: 'number', example: 1 },
-        sessionId: { type: 'number', example: 6 },
-      },
-      required: ['staffId', 'month', 'year', 'basicSalary', 'netSalary'],
-    },
-  })
-  generatePayroll(@Body() dto: any) {
+  @ApiBody({ type: GeneratePayrollDto })
+  generatePayroll(@Body() dto: GeneratePayrollDto) {
     return this.service.generatePayroll(dto);
   }
 
@@ -172,16 +143,8 @@ export class PayrollController {
   @ForgeMessage('Payroll payment processed')
   @ApiOperation({ summary: 'Mark payroll as paid' })
   @ApiParam({ name: 'id', type: Number })
-  @ApiBody({
-    schema: {
-      properties: {
-        paymentDate: { type: 'string', example: '2025-05-31' },
-        accountId: { type: 'number', example: 1 },
-      },
-      required: ['paymentDate'],
-    },
-  })
-  payPayroll(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: PayPayrollDto })
+  payPayroll(@Param('id', ParseIntIdPipe) id: number, @Body() dto: PayPayrollDto) {
     return this.service.payPayroll(id, dto);
   }
 }

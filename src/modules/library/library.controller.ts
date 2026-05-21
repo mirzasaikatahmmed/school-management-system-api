@@ -5,8 +5,11 @@ import {
   Body,
   Patch,
   Param,
+  Delete,
   UseGuards,
   Query,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -15,6 +18,7 @@ import {
   ApiParam,
   ApiQuery,
   ApiBody,
+  ApiResponse,
 } from '@nestjs/swagger';
 import { ForgeMessage } from 'nestjs-api-forge';
 import { LibraryService } from './library.service';
@@ -24,6 +28,9 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/roles.enum';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
+import { CreateBookDto } from './dto/create-book.dto';
+import { IssueBookDto } from './dto/issue-book.dto';
+import { CreateBookCategoryDto } from './dto/create-book-category.dto';
 
 @ApiTags('Library')
 @ApiBearerAuth('access-token')
@@ -36,34 +43,8 @@ export class LibraryController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.LIBRARIAN)
   @ForgeMessage('Book added to library')
   @ApiOperation({ summary: 'Add a new book' })
-  @ApiBody({
-    schema: {
-      properties: {
-        title: { type: 'string', example: 'Bangla Grammar' },
-        author: { type: 'string', example: 'Dr. Humayun Azad' },
-        isbnNo: { type: 'string', example: '978-984-00-0000-0' },
-        categoryId: { type: 'number', example: 1 },
-        publisher: { type: 'string', example: 'Dhaka: BD Publishers' },
-        edition: { type: 'string', example: '3rd' },
-        purchaseDate: { type: 'string', example: '2023-01-01' },
-        price: { type: 'number', example: 250 },
-        totalStock: { type: 'string', example: '10' },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: [
-        'title',
-        'author',
-        'isbnNo',
-        'categoryId',
-        'publisher',
-        'edition',
-        'purchaseDate',
-        'price',
-        'totalStock',
-      ],
-    },
-  })
-  createBook(@Body() dto: any) {
+  @ApiBody({ type: CreateBookDto })
+  createBook(@Body() dto: CreateBookDto) {
     return this.libraryService.createBook(dto);
   }
 
@@ -100,7 +81,11 @@ export class LibraryController {
   @ForgeMessage('Book updated')
   @ApiOperation({ summary: 'Update book details' })
   @ApiParam({ name: 'id', type: Number })
-  updateBook(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateBookDto })
+  updateBook(
+    @Param('id', ParseIntIdPipe) id: number,
+    @Body() dto: CreateBookDto,
+  ) {
     return this.libraryService.updateBook(id, dto);
   }
 
@@ -108,28 +93,8 @@ export class LibraryController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.LIBRARIAN)
   @ForgeMessage('Book issued successfully')
   @ApiOperation({ summary: 'Issue a book to a user' })
-  @ApiBody({
-    schema: {
-      properties: {
-        bookId: { type: 'number', example: 1 },
-        userId: { type: 'number', example: 1 },
-        roleId: { type: 'number', example: 7 },
-        dateOfIssue: { type: 'string', example: '2025-05-05' },
-        dateOfExpiry: { type: 'string', example: '2025-05-19' },
-        sessionId: { type: 'number', example: 6 },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: [
-        'bookId',
-        'userId',
-        'roleId',
-        'dateOfIssue',
-        'dateOfExpiry',
-        'sessionId',
-      ],
-    },
-  })
-  issueBook(@Body() dto: any) {
+  @ApiBody({ type: IssueBookDto })
+  issueBook(@Body() dto: IssueBookDto) {
     return this.libraryService.issueBook(dto);
   }
 
@@ -170,5 +135,59 @@ export class LibraryController {
       status: status !== undefined ? +status : undefined,
       branchId: branchId ? +branchId : undefined,
     });
+  }
+
+  @Get('overdue')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.LIBRARIAN)
+  @ForgeMessage('Overdue issues fetched')
+  @ApiOperation({ summary: 'List overdue book issues with calculated fine' })
+  @ApiQuery({ name: 'dailyFineRate', required: false, type: Number, description: 'Fine per day (default 2)' })
+  @ApiQuery({ name: 'branchId', required: false, type: Number })
+  getOverdueIssues(
+    @Query('dailyFineRate') dailyFineRate?: string,
+    @Query('branchId') branchId?: string,
+  ) {
+    return this.libraryService.getOverdueIssues(
+      dailyFineRate ? +dailyFineRate : 2,
+      branchId ? +branchId : undefined,
+    );
+  }
+
+  // Book Categories
+  @Post('categories')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.LIBRARIAN)
+  @ForgeMessage('Category created')
+  @ApiOperation({ summary: 'Create a book category' })
+  @ApiBody({ type: CreateBookCategoryDto })
+  createCategory(@Body() dto: CreateBookCategoryDto) {
+    return this.libraryService.createCategory(dto);
+  }
+
+  @Get('categories')
+  @ForgeMessage('Categories fetched')
+  @ApiOperation({ summary: 'List book categories' })
+  @ApiQuery({ name: 'branchId', required: false, type: Number })
+  getCategories(@Query('branchId') branchId?: string) {
+    return this.libraryService.getCategories(branchId ? +branchId : undefined);
+  }
+
+  @Patch('categories/:id')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.LIBRARIAN)
+  @ForgeMessage('Category updated')
+  @ApiOperation({ summary: 'Update a book category' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiBody({ type: CreateBookCategoryDto })
+  updateCategory(@Param('id', ParseIntIdPipe) id: number, @Body() dto: CreateBookCategoryDto) {
+    return this.libraryService.updateCategory(id, dto);
+  }
+
+  @Delete('categories/:id')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.LIBRARIAN)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a book category' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: 204 })
+  removeCategory(@Param('id', ParseIntIdPipe) id: number) {
+    return this.libraryService.removeCategory(id);
   }
 }

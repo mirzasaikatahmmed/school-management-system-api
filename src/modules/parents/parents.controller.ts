@@ -27,6 +27,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/roles.enum';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
+import { CreateParentDto } from './dto/create-parent.dto';
 
 @ApiTags('Parents')
 @ApiBearerAuth('access-token')
@@ -39,21 +40,8 @@ export class ParentsController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Parent created')
   @ApiOperation({ summary: 'Create a parent profile' })
-  @ApiBody({
-    schema: {
-      properties: {
-        fullName: { type: 'string', example: 'Rahim Uddin' },
-        email: { type: 'string' },
-        phone: { type: 'string', example: '01711223344' },
-        occupation: { type: 'string' },
-        address: { type: 'string' },
-        nationalId: { type: 'string' },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['fullName'],
-    },
-  })
-  create(@Body() dto: any) {
+  @ApiBody({ type: CreateParentDto })
+  create(@Body() dto: CreateParentDto) {
     return this.service.create(dto);
   }
 
@@ -78,7 +66,8 @@ export class ParentsController {
   @ForgeMessage('Parent updated')
   @ApiOperation({ summary: 'Update parent profile' })
   @ApiParam({ name: 'id', type: Number })
-  update(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateParentDto })
+  update(@Param('id', ParseIntIdPipe) id: number, @Body() dto: CreateParentDto) {
     return this.service.update(id, dto);
   }
 

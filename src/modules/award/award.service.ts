@@ -3,12 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotFoundException } from 'nestjs-api-forge';
 import { Award } from './entities/award.entity';
+import { CreateAwardDto } from './dto/create-award.dto';
 
 @Injectable()
 export class AwardService {
   constructor(@InjectRepository(Award) private awardRepo: Repository<Award>) {}
 
-  create(dto: any, awardedBy: number) {
+  create(dto: CreateAwardDto, awardedBy: number) {
     return this.awardRepo.save(this.awardRepo.create({ ...dto, awardedBy }));
   }
 
@@ -36,7 +37,7 @@ export class AwardService {
     return qb.getMany();
   }
 
-  async update(id: number, dto: any) {
+  async update(id: number, dto: Partial<CreateAwardDto>) {
     const a = await this.awardRepo.findOneBy({ id });
     if (!a) throw new NotFoundException('Award not found');
     return this.awardRepo.save({ ...a, ...dto });

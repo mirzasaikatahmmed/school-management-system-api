@@ -5,6 +5,9 @@ import { NotFoundException } from 'nestjs-api-forge';
 import { Account } from './entities/account.entity';
 import { VoucherHead } from './entities/voucher-head.entity';
 import { Transaction, TransactionType } from './entities/transaction.entity';
+import { CreateAccountDto } from './dto/create-account.dto';
+import { CreateVoucherHeadDto } from './dto/create-voucher-head.dto';
+import { CreateTransactionDto } from './dto/create-transaction.dto';
 
 @Injectable()
 export class AccountingService {
@@ -17,7 +20,7 @@ export class AccountingService {
   ) {}
 
   // Accounts
-  createAccount(dto: any) {
+  createAccount(dto: CreateAccountDto) {
     return this.accountRepo.save(this.accountRepo.create(dto));
   }
 
@@ -28,7 +31,7 @@ export class AccountingService {
     });
   }
 
-  async updateAccount(id: number, dto: any) {
+  async updateAccount(id: number, dto: Partial<CreateAccountDto>) {
     const account = await this.accountRepo.findOneBy({ id });
     if (!account) throw new NotFoundException('Account not found');
     return this.accountRepo.save({ ...account, ...dto });
@@ -41,7 +44,7 @@ export class AccountingService {
   }
 
   // Voucher Heads
-  createVoucherHead(dto: any) {
+  createVoucherHead(dto: CreateVoucherHeadDto) {
     return this.voucherHeadRepo.save(this.voucherHeadRepo.create(dto));
   }
 
@@ -49,7 +52,7 @@ export class AccountingService {
     return this.voucherHeadRepo.find({ where: branchId ? { branchId } : {} });
   }
 
-  async updateVoucherHead(id: number, dto: any) {
+  async updateVoucherHead(id: number, dto: Partial<CreateVoucherHeadDto>) {
     const head = await this.voucherHeadRepo.findOneBy({ id });
     if (!head) throw new NotFoundException('Voucher head not found');
     return this.voucherHeadRepo.save({ ...head, ...dto });
@@ -62,7 +65,7 @@ export class AccountingService {
   }
 
   // Transactions
-  async createTransaction(dto: any, createdBy: number) {
+  async createTransaction(dto: CreateTransactionDto, createdBy: number) {
     const account = await this.accountRepo.findOneBy({ id: dto.accountId });
     if (!account) throw new NotFoundException('Account not found');
 

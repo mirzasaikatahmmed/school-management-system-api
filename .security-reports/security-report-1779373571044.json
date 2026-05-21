@@ -1,0 +1,62 @@
+{
+  "timestamp": "2026-05-21T14:26:11.043Z",
+  "passed": true,
+  "secrets": [],
+  "vulnerabilities": {
+    "total": 2,
+    "critical": 0,
+    "high": 1,
+    "moderate": 1,
+    "low": 0,
+    "info": 0,
+    "packages": [
+      {
+        "name": "brace-expansion",
+        "severity": "moderate",
+        "via": [
+          "brace-expansion: Large numeric range defeats documented `max` DoS protection"
+        ],
+        "fixAvailable": true
+      },
+      {
+        "name": "fast-uri",
+        "severity": "high",
+        "via": [
+          "fast-uri vulnerable to host confusion via percent-encoded authority delimiters"
+        ],
+        "fixAvailable": true
+      }
+    ],
+    "languages": [
+      {
+        "language": "Node.js",
+        "icon": "🟢",
+        "detected": true,
+        "toolAvailable": true,
+        "total": 2,
+        "critical": 0,
+        "high": 1,
+        "moderate": 1,
+        "low": 0,
+        "packages": [
+          {
+            "name": "brace-expansion",
+            "severity": "moderate",
+            "via": [
+              "brace-expansion: Large numeric range defeats documented `max` DoS protection"
+            ],
+            "fixAvailable": true
+          },
+          {
+            "name": "fast-uri",
+            "severity": "high",
+            "via": [
+              "fast-uri vulnerable to host confusion via percent-encoded authority delimiters"
+            ],
+            "fixAvailable": true
+          }
+        ]
+      }
+    ]
+  }
+}

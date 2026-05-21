@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotFoundException } from 'nestjs-api-forge';
 import { Parent } from './entities/parent.entity';
+import { CreateParentDto } from './dto/create-parent.dto';
 
 @Injectable()
 export class ParentsService {
@@ -10,7 +11,7 @@ export class ParentsService {
     @InjectRepository(Parent) private parentRepo: Repository<Parent>,
   ) {}
 
-  create(dto: any) {
+  create(dto: CreateParentDto) {
     return this.parentRepo.save(this.parentRepo.create(dto));
   }
 
@@ -27,7 +28,7 @@ export class ParentsService {
     return parent;
   }
 
-  async update(id: number, dto: any) {
+  async update(id: number, dto: Partial<CreateParentDto>) {
     const parent = await this.findOne(id);
     return this.parentRepo.save({ ...parent, ...dto });
   }

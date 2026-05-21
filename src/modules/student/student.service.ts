@@ -8,6 +8,7 @@ import { StudentCategory } from './entities/student-category.entity';
 import { StudentPromotion } from './entities/student-promotion.entity';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { CreateEnrollDto } from './dto/create-enroll.dto';
+import { CreatePromotionDto } from './dto/create-promotion.dto';
 
 export interface StudentQueryFilter {
   branchId?: number;
@@ -105,16 +106,7 @@ export class StudentService {
   }
 
   async promoteStudent(
-    dto: {
-      studentId: number;
-      fromClassId: number;
-      fromSectionId?: number;
-      fromSessionId: number;
-      toClassId: number;
-      toSectionId?: number;
-      toSessionId: number;
-      branchId?: number;
-    },
+    dto: CreatePromotionDto,
     promotedBy: number,
   ): Promise<StudentPromotion> {
     const student = await this.findOne(dto.studentId);

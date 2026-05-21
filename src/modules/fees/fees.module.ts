@@ -4,6 +4,7 @@ import { FeesType } from './entities/fees-type.entity';
 import { FeeGroup } from './entities/fee-group.entity';
 import { FeeAllocation } from './entities/fee-allocation.entity';
 import { FeePaymentHistory } from './entities/fee-payment-history.entity';
+import { FeeFine } from './entities/fee-fine.entity';
 import { FeesService } from './fees.service';
 import { FeesController } from './fees.controller';
 
@@ -14,6 +15,7 @@ import { FeesController } from './fees.controller';
       FeeGroup,
       FeeAllocation,
       FeePaymentHistory,
+      FeeFine,
     ]),
   ],
   controllers: [FeesController],

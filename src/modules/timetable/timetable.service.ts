@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { NotFoundException } from 'nestjs-api-forge';
 import { Timetable } from './entities/timetable.entity';
 import { ExamTimetable } from './entities/exam-timetable.entity';
+import { CreateTimetableDto } from './dto/create-timetable.dto';
+import { CreateExamTimetableDto } from './dto/create-exam-timetable.dto';
 
 @Injectable()
 export class TimetableService {
@@ -13,7 +15,7 @@ export class TimetableService {
     private examTimetableRepo: Repository<ExamTimetable>,
   ) {}
 
-  createEntry(dto: any) {
+  createEntry(dto: CreateTimetableDto) {
     return this.timetableRepo.save(this.timetableRepo.create(dto));
   }
 
@@ -38,7 +40,7 @@ export class TimetableService {
     return qb.getMany();
   }
 
-  async updateEntry(id: number, dto: any) {
+  async updateEntry(id: number, dto: Partial<CreateTimetableDto>) {
     const entry = await this.timetableRepo.findOneBy({ id });
     if (!entry) throw new NotFoundException('Timetable entry not found');
     return this.timetableRepo.save({ ...entry, ...dto });
@@ -50,7 +52,7 @@ export class TimetableService {
     return this.timetableRepo.remove(entry);
   }
 
-  createExamEntry(dto: any) {
+  createExamEntry(dto: CreateExamTimetableDto) {
     return this.examTimetableRepo.save(this.examTimetableRepo.create(dto));
   }
 

@@ -28,6 +28,9 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/roles.enum';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
+import { CreateQuestionDto } from './dto/create-question.dto';
+import { CreateExamSessionDto } from './dto/create-exam-session.dto';
+import { SubmitExamDto } from './dto/submit-exam.dto';
 
 @ApiTags('Online Exam')
 @ApiBearerAuth('access-token')
@@ -40,23 +43,8 @@ export class OnlineExamController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.TEACHER)
   @ForgeMessage('Question created')
   @ApiOperation({ summary: 'Create an MCQ question' })
-  @ApiBody({
-    schema: {
-      properties: {
-        subjectId: { type: 'number' },
-        question: { type: 'string', example: 'What is 2+2?' },
-        optionA: { type: 'string', example: '3' },
-        optionB: { type: 'string', example: '4' },
-        optionC: { type: 'string', example: '5' },
-        optionD: { type: 'string', example: '6' },
-        correctAnswer: { type: 'string', example: 'B' },
-        explanation: { type: 'string' },
-        branchId: { type: 'number' },
-      },
-      required: ['question', 'optionA', 'optionB', 'correctAnswer'],
-    },
-  })
-  createQuestion(@Body() dto: any) {
+  @ApiBody({ type: CreateQuestionDto })
+  createQuestion(@Body() dto: CreateQuestionDto) {
     return this.service.createQuestion(dto);
   }
 
@@ -83,7 +71,8 @@ export class OnlineExamController {
   @ForgeMessage('Question updated')
   @ApiOperation({ summary: 'Update a question' })
   @ApiParam({ name: 'id', type: Number })
-  updateQuestion(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateQuestionDto })
+  updateQuestion(@Param('id', ParseIntIdPipe) id: number, @Body() dto: CreateQuestionDto) {
     return this.service.updateQuestion(id, dto);
   }
 
@@ -101,25 +90,8 @@ export class OnlineExamController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.TEACHER)
   @ForgeMessage('Exam session created')
   @ApiOperation({ summary: 'Create an online exam session' })
-  @ApiBody({
-    schema: {
-      properties: {
-        title: { type: 'string', example: 'Math Quiz 1' },
-        classId: { type: 'number', example: 1 },
-        subjectId: { type: 'number', example: 1 },
-        examDate: { type: 'string', example: '2025-06-15' },
-        startTime: { type: 'string', example: '09:00' },
-        endTime: { type: 'string', example: '10:00' },
-        durationMinutes: { type: 'number', example: 60 },
-        totalMarks: { type: 'number', example: 50 },
-        passMarks: { type: 'number', example: 20 },
-        branchId: { type: 'number', example: 1 },
-        sessionId: { type: 'number', example: 6 },
-      },
-      required: ['title', 'classId', 'examDate', 'startTime', 'endTime'],
-    },
-  })
-  createSession(@Body() dto: any) {
+  @ApiBody({ type: CreateExamSessionDto })
+  createSession(@Body() dto: CreateExamSessionDto) {
     return this.service.createSession(dto);
   }
 
@@ -146,7 +118,8 @@ export class OnlineExamController {
   @ForgeMessage('Session updated')
   @ApiOperation({ summary: 'Update an exam session' })
   @ApiParam({ name: 'id', type: Number })
-  updateSession(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateExamSessionDto })
+  updateSession(@Param('id', ParseIntIdPipe) id: number, @Body() dto: CreateExamSessionDto) {
     return this.service.updateSession(id, dto);
   }
 
@@ -164,21 +137,8 @@ export class OnlineExamController {
   @Roles(Role.STUDENT)
   @ForgeMessage('Exam submitted successfully')
   @ApiOperation({ summary: 'Submit an online exam (auto-scored)' })
-  @ApiBody({
-    schema: {
-      properties: {
-        examSessionId: { type: 'number', example: 1 },
-        answers: {
-          type: 'object',
-          example: { '1': 'A', '2': 'C' },
-          description: 'Map of question ID to answer option',
-        },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['examSessionId', 'answers'],
-    },
-  })
-  submitExam(@Body() dto: any, @CurrentUser() user: any) {
+  @ApiBody({ type: SubmitExamDto })
+  submitExam(@Body() dto: SubmitExamDto, @CurrentUser() user: any) {
     return this.service.submitExam({ ...dto, studentId: user.id });
   }
 

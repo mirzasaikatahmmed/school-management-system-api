@@ -27,6 +27,8 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/roles.enum';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
+import { CreateTimetableDto } from './dto/create-timetable.dto';
+import { CreateExamTimetableDto } from './dto/create-exam-timetable.dto';
 
 @ApiTags('Timetable')
 @ApiBearerAuth('access-token')
@@ -39,28 +41,8 @@ export class TimetableController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Timetable entry created')
   @ApiOperation({ summary: 'Add a class timetable entry' })
-  @ApiBody({
-    schema: {
-      properties: {
-        classId: { type: 'number', example: 1 },
-        sectionId: { type: 'number', example: 1 },
-        subjectId: { type: 'number', example: 1 },
-        teacherId: { type: 'number', example: 1 },
-        dayOfWeek: {
-          type: 'number',
-          example: 1,
-          description: '1=Mon ... 7=Sun',
-        },
-        startTime: { type: 'string', example: '08:00' },
-        endTime: { type: 'string', example: '08:45' },
-        roomNo: { type: 'string' },
-        branchId: { type: 'number', example: 1 },
-        sessionId: { type: 'number', example: 6 },
-      },
-      required: ['classId', 'subjectId', 'dayOfWeek', 'startTime', 'endTime'],
-    },
-  })
-  createEntry(@Body() dto: any) {
+  @ApiBody({ type: CreateTimetableDto })
+  createEntry(@Body() dto: CreateTimetableDto) {
     return this.service.createEntry(dto);
   }
 
@@ -90,7 +72,11 @@ export class TimetableController {
   @ForgeMessage('Timetable entry updated')
   @ApiOperation({ summary: 'Update a timetable entry' })
   @ApiParam({ name: 'id', type: Number })
-  updateEntry(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateTimetableDto })
+  updateEntry(
+    @Param('id', ParseIntIdPipe) id: number,
+    @Body() dto: CreateTimetableDto,
+  ) {
     return this.service.updateEntry(id, dto);
   }
 
@@ -104,35 +90,12 @@ export class TimetableController {
     return this.service.removeEntry(id);
   }
 
-  // Exam Timetable
   @Post('exam')
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Exam timetable entry created')
   @ApiOperation({ summary: 'Add an exam timetable entry' })
-  @ApiBody({
-    schema: {
-      properties: {
-        examId: { type: 'number', example: 1 },
-        classId: { type: 'number', example: 1 },
-        subjectId: { type: 'number', example: 1 },
-        examDate: { type: 'string', example: '2025-11-01' },
-        startTime: { type: 'string', example: '09:00' },
-        endTime: { type: 'string', example: '12:00' },
-        roomNo: { type: 'string' },
-        branchId: { type: 'number', example: 1 },
-        sessionId: { type: 'number', example: 6 },
-      },
-      required: [
-        'examId',
-        'classId',
-        'subjectId',
-        'examDate',
-        'startTime',
-        'endTime',
-      ],
-    },
-  })
-  createExamEntry(@Body() dto: any) {
+  @ApiBody({ type: CreateExamTimetableDto })
+  createExamEntry(@Body() dto: CreateExamTimetableDto) {
     return this.service.createExamEntry(dto);
   }
 

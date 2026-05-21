@@ -7,6 +7,8 @@ import {
   LeaveApplication,
   LeaveStatus,
 } from './entities/leave-application.entity';
+import { CreateLeaveCategoryDto } from './dto/create-leave-category.dto';
+import { ApplyLeaveDto } from './dto/apply-leave.dto';
 
 @Injectable()
 export class LeaveService {
@@ -17,7 +19,7 @@ export class LeaveService {
     private applicationRepo: Repository<LeaveApplication>,
   ) {}
 
-  createCategory(dto: any) {
+  createCategory(dto: CreateLeaveCategoryDto) {
     return this.categoryRepo.save(this.categoryRepo.create(dto));
   }
 
@@ -25,7 +27,7 @@ export class LeaveService {
     return this.categoryRepo.find({ where: branchId ? { branchId } : {} });
   }
 
-  async updateCategory(id: number, dto: any) {
+  async updateCategory(id: number, dto: Partial<CreateLeaveCategoryDto>) {
     const cat = await this.categoryRepo.findOneBy({ id });
     if (!cat) throw new NotFoundException('Leave category not found');
     return this.categoryRepo.save({ ...cat, ...dto });
@@ -37,7 +39,7 @@ export class LeaveService {
     return this.categoryRepo.remove(cat);
   }
 
-  applyLeave(dto: any, staffId: number) {
+  applyLeave(dto: ApplyLeaveDto, staffId: number) {
     return this.applicationRepo.save(
       this.applicationRepo.create({ ...dto, staffId }),
     );
@@ -70,7 +72,7 @@ export class LeaveService {
     });
   }
 
-  async rejectLeave(id: number, rejectionReason: string, approvedBy: number) {
+  async rejectLeave(id: number, rejectionReason: string | undefined, approvedBy: number) {
     const app = await this.applicationRepo.findOneBy({ id });
     if (!app) throw new NotFoundException('Leave application not found');
     return this.applicationRepo.save({

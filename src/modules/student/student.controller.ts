@@ -25,6 +25,7 @@ import { ForgeMessage } from 'nestjs-api-forge';
 import { StudentService } from './student.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { CreateEnrollDto } from './dto/create-enroll.dto';
+import { CreatePromotionDto } from './dto/create-promotion.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -175,28 +176,8 @@ export class StudentController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Student promoted successfully')
   @ApiOperation({ summary: 'Promote a student to the next class/session' })
-  @ApiBody({
-    schema: {
-      properties: {
-        studentId: { type: 'number', example: 5 },
-        fromClassId: { type: 'number', example: 1 },
-        fromSectionId: { type: 'number' },
-        fromSessionId: { type: 'number', example: 6 },
-        toClassId: { type: 'number', example: 2 },
-        toSectionId: { type: 'number' },
-        toSessionId: { type: 'number', example: 7 },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: [
-        'studentId',
-        'fromClassId',
-        'fromSessionId',
-        'toClassId',
-        'toSessionId',
-      ],
-    },
-  })
-  promoteStudent(@Body() dto: any, @CurrentUser() user: any) {
+  @ApiBody({ type: CreatePromotionDto })
+  promoteStudent(@Body() dto: CreatePromotionDto, @CurrentUser() user: any) {
     return this.studentService.promoteStudent(dto, user.id);
   }
 

@@ -28,6 +28,9 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/roles.enum';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
+import { CreateAccountDto } from './dto/create-account.dto';
+import { CreateVoucherHeadDto } from './dto/create-voucher-head.dto';
+import { CreateTransactionDto } from './dto/create-transaction.dto';
 
 @ApiTags('Accounting')
 @ApiBearerAuth('access-token')
@@ -41,19 +44,8 @@ export class AccountingController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.ACCOUNTANT)
   @ForgeMessage('Account created')
   @ApiOperation({ summary: 'Create an account' })
-  @ApiBody({
-    schema: {
-      properties: {
-        accountName: { type: 'string', example: 'Cash in Hand' },
-        accountNo: { type: 'string' },
-        accountType: { type: 'string', example: 'cash' },
-        openingBalance: { type: 'number', example: 0 },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['accountName'],
-    },
-  })
-  createAccount(@Body() dto: any) {
+  @ApiBody({ type: CreateAccountDto })
+  createAccount(@Body() dto: CreateAccountDto) {
     return this.service.createAccount(dto);
   }
 
@@ -70,7 +62,8 @@ export class AccountingController {
   @ForgeMessage('Account updated')
   @ApiOperation({ summary: 'Update an account' })
   @ApiParam({ name: 'id', type: Number })
-  updateAccount(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateAccountDto })
+  updateAccount(@Param('id', ParseIntIdPipe) id: number, @Body() dto: CreateAccountDto) {
     return this.service.updateAccount(id, dto);
   }
 
@@ -89,17 +82,8 @@ export class AccountingController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.ACCOUNTANT)
   @ForgeMessage('Voucher head created')
   @ApiOperation({ summary: 'Create a voucher head' })
-  @ApiBody({
-    schema: {
-      properties: {
-        name: { type: 'string', example: 'School Fee' },
-        description: { type: 'string' },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['name'],
-    },
-  })
-  createVoucherHead(@Body() dto: any) {
+  @ApiBody({ type: CreateVoucherHeadDto })
+  createVoucherHead(@Body() dto: CreateVoucherHeadDto) {
     return this.service.createVoucherHead(dto);
   }
 
@@ -116,7 +100,8 @@ export class AccountingController {
   @ForgeMessage('Voucher head updated')
   @ApiOperation({ summary: 'Update a voucher head' })
   @ApiParam({ name: 'id', type: Number })
-  updateVoucherHead(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateVoucherHeadDto })
+  updateVoucherHead(@Param('id', ParseIntIdPipe) id: number, @Body() dto: CreateVoucherHeadDto) {
     return this.service.updateVoucherHead(id, dto);
   }
 
@@ -135,27 +120,8 @@ export class AccountingController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.ACCOUNTANT)
   @ForgeMessage('Transaction recorded')
   @ApiOperation({ summary: 'Record a deposit or expense transaction' })
-  @ApiBody({
-    schema: {
-      properties: {
-        accountId: { type: 'number', example: 1 },
-        voucherHeadId: { type: 'number', example: 1 },
-        transactionType: {
-          type: 'string',
-          enum: ['debit', 'credit'],
-          example: 'credit',
-        },
-        amount: { type: 'number', example: 5000 },
-        description: { type: 'string', example: 'Monthly salary' },
-        referenceNo: { type: 'string' },
-        transactionDate: { type: 'string', example: '2025-05-01' },
-        branchId: { type: 'number', example: 1 },
-        sessionId: { type: 'number', example: 6 },
-      },
-      required: ['accountId', 'transactionType', 'amount', 'transactionDate'],
-    },
-  })
-  createTransaction(@Body() dto: any, @CurrentUser() user: any) {
+  @ApiBody({ type: CreateTransactionDto })
+  createTransaction(@Body() dto: CreateTransactionDto, @CurrentUser() user: any) {
     return this.service.createTransaction(dto, user.id);
   }
 

@@ -28,6 +28,9 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/roles.enum';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
+import { CreateHomeworkDto } from './dto/create-homework.dto';
+import { SubmitHomeworkDto } from './dto/submit-homework.dto';
+import { EvaluateSubmissionDto } from './dto/evaluate-submission.dto';
 
 @ApiTags('Homework')
 @ApiBearerAuth('access-token')
@@ -40,23 +43,8 @@ export class HomeworkController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN, Role.TEACHER)
   @ForgeMessage('Homework created')
   @ApiOperation({ summary: 'Create a homework assignment' })
-  @ApiBody({
-    schema: {
-      properties: {
-        classId: { type: 'number', example: 1 },
-        sectionId: { type: 'number' },
-        subjectId: { type: 'number', example: 1 },
-        title: { type: 'string', example: 'Chapter 5 Exercises' },
-        description: { type: 'string' },
-        submissionDate: { type: 'string', example: '2025-06-10' },
-        maxMarks: { type: 'number', example: 20 },
-        branchId: { type: 'number', example: 1 },
-        sessionId: { type: 'number', example: 6 },
-      },
-      required: ['classId', 'subjectId', 'title', 'submissionDate'],
-    },
-  })
-  createHomework(@Body() dto: any, @CurrentUser() user: any) {
+  @ApiBody({ type: CreateHomeworkDto })
+  createHomework(@Body() dto: CreateHomeworkDto, @CurrentUser() user: any) {
     return this.service.createHomework(dto, user.id);
   }
 
@@ -89,7 +77,11 @@ export class HomeworkController {
   @ForgeMessage('Homework updated')
   @ApiOperation({ summary: 'Update a homework assignment' })
   @ApiParam({ name: 'id', type: Number })
-  updateHomework(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateHomeworkDto })
+  updateHomework(
+    @Param('id', ParseIntIdPipe) id: number,
+    @Body() dto: CreateHomeworkDto,
+  ) {
     return this.service.updateHomework(id, dto);
   }
 
@@ -107,17 +99,8 @@ export class HomeworkController {
   @Roles(Role.STUDENT)
   @ForgeMessage('Homework submitted')
   @ApiOperation({ summary: 'Submit homework (student)' })
-  @ApiBody({
-    schema: {
-      properties: {
-        homeworkId: { type: 'number', example: 1 },
-        content: { type: 'string' },
-        filePath: { type: 'string' },
-      },
-      required: ['homeworkId'],
-    },
-  })
-  submitHomework(@Body() dto: any, @CurrentUser() user: any) {
+  @ApiBody({ type: SubmitHomeworkDto })
+  submitHomework(@Body() dto: SubmitHomeworkDto, @CurrentUser() user: any) {
     return this.service.submitHomework(dto, user.id);
   }
 
@@ -141,17 +124,10 @@ export class HomeworkController {
   @ForgeMessage('Submission evaluated')
   @ApiOperation({ summary: 'Evaluate a homework submission' })
   @ApiParam({ name: 'id', type: Number })
-  @ApiBody({
-    schema: {
-      properties: {
-        obtainedMarks: { type: 'number', example: 18 },
-        feedback: { type: 'string', example: 'Good work!' },
-      },
-    },
-  })
+  @ApiBody({ type: EvaluateSubmissionDto })
   evaluateSubmission(
     @Param('id', ParseIntIdPipe) id: number,
-    @Body() dto: any,
+    @Body() dto: EvaluateSubmissionDto,
     @CurrentUser() user: any,
   ) {
     return this.service.evaluateSubmission(id, dto, user.id);

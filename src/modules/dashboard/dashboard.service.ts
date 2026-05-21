@@ -7,8 +7,19 @@ export class DashboardService {
   constructor(@InjectDataSource() private dataSource: DataSource) {}
 
   async getStats(branchId?: number, sessionId?: number) {
-    const branchFilter = branchId ? `AND branch_id = ${branchId}` : '';
-    const sessionFilter = sessionId ? `AND session_id = ${sessionId}` : '';
+    const params: (number | string)[] = [];
+    let branchFilter = '';
+    let sessionFilter = '';
+    let p = 1;
+
+    if (branchId) {
+      branchFilter = `AND branch_id = $${p++}`;
+      params.push(branchId);
+    }
+    if (sessionId) {
+      sessionFilter = `AND session_id = $${p++}`;
+      params.push(sessionId);
+    }
 
     const [
       students,
@@ -21,24 +32,31 @@ export class DashboardService {
     ] = await Promise.all([
       this.dataSource.query(
         `SELECT COUNT(*) as count FROM students WHERE 1=1 ${branchFilter}`,
+        branchId ? [branchId] : [],
       ),
       this.dataSource.query(
         `SELECT COUNT(*) as count FROM staff WHERE 1=1 ${branchFilter}`,
+        branchId ? [branchId] : [],
       ),
       this.dataSource.query(
         `SELECT COUNT(*) as count FROM parents WHERE 1=1 ${branchFilter}`,
+        branchId ? [branchId] : [],
       ),
       this.dataSource.query(
         `SELECT COALESCE(SUM(paid_amount), 0) as total FROM fee_payment_histories WHERE 1=1 ${branchFilter} ${sessionFilter}`,
+        params,
       ),
       this.dataSource.query(
         `SELECT COALESCE(SUM(due_amount), 0) as total FROM fee_payment_histories WHERE due_amount > 0 ${branchFilter} ${sessionFilter}`,
+        params,
       ),
       this.dataSource.query(
         `SELECT COUNT(*) as count FROM events WHERE 1=1 ${branchFilter} ${sessionFilter}`,
+        params,
       ),
       this.dataSource.query(
-        `SELECT COUNT(*) as count FROM books WHERE 1=1 ${branchFilter}`,
+        `SELECT COUNT(*) as count FROM book WHERE 1=1 ${branchFilter}`,
+        branchId ? [branchId] : [],
       ),
     ]);
 
@@ -55,21 +73,38 @@ export class DashboardService {
 
   async getAttendanceSummary(branchId?: number, sessionId?: number) {
     const today = new Date().toISOString().split('T')[0];
-    const branchFilter = branchId ? `AND branch_id = ${branchId}` : '';
-    const sessionFilter = sessionId ? `AND session_id = ${sessionId}` : '';
+    const params: (number | string)[] = [today];
+    let branchFilter = '';
+    let sessionFilter = '';
+    let p = 2;
+
+    if (branchId) {
+      branchFilter = `AND branch_id = $${p++}`;
+      params.push(branchId);
+    }
+    if (sessionId) {
+      sessionFilter = `AND session_id = $${p++}`;
+      params.push(sessionId);
+    }
+
+    const baseQuery = `FROM student_attendances WHERE attendance_date = $1 ${branchFilter} ${sessionFilter}`;
 
     const [present, absent, holiday, late] = await Promise.all([
       this.dataSource.query(
-        `SELECT COUNT(*) as count FROM student_attendances WHERE attendance_date = '${today}' AND status = 'P' ${branchFilter} ${sessionFilter}`,
+        `SELECT COUNT(*) as count ${baseQuery} AND status = 'P'`,
+        params,
       ),
       this.dataSource.query(
-        `SELECT COUNT(*) as count FROM student_attendances WHERE attendance_date = '${today}' AND status = 'A' ${branchFilter} ${sessionFilter}`,
+        `SELECT COUNT(*) as count ${baseQuery} AND status = 'A'`,
+        params,
       ),
       this.dataSource.query(
-        `SELECT COUNT(*) as count FROM student_attendances WHERE attendance_date = '${today}' AND status = 'H' ${branchFilter} ${sessionFilter}`,
+        `SELECT COUNT(*) as count ${baseQuery} AND status = 'H'`,
+        params,
       ),
       this.dataSource.query(
-        `SELECT COUNT(*) as count FROM student_attendances WHERE attendance_date = '${today}' AND status = 'L' ${branchFilter} ${sessionFilter}`,
+        `SELECT COUNT(*) as count ${baseQuery} AND status = 'L'`,
+        params,
       ),
     ]);
 
@@ -93,9 +128,18 @@ export class DashboardService {
   }
 
   async getRecentPayments(branchId?: number, limit = 10) {
-    const branchFilter = branchId ? `AND branch_id = ${branchId}` : '';
+    const safeLimit = Math.min(Math.max(parseInt(String(limit)) || 10, 1), 100);
+    const params: (number | string)[] = [];
+    let branchFilter = '';
+
+    if (branchId) {
+      branchFilter = `AND branch_id = $1`;
+      params.push(branchId);
+    }
+
     const rows = await this.dataSource.query(
-      `SELECT * FROM fee_payment_histories WHERE 1=1 ${branchFilter} ORDER BY created_at DESC LIMIT ${limit}`,
+      `SELECT * FROM fee_payment_histories WHERE 1=1 ${branchFilter} ORDER BY created_at DESC LIMIT ${safeLimit}`,
+      params,
     );
     return rows;
   }

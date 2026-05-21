@@ -6,6 +6,10 @@ import { Hostel } from './entities/hostel.entity';
 import { HostelRoom } from './entities/hostel-room.entity';
 import { HostelCategory } from './entities/hostel-category.entity';
 import { HostelAllocation } from './entities/hostel-allocation.entity';
+import { CreateHostelDto } from './dto/create-hostel.dto';
+import { CreateHostelRoomDto } from './dto/create-hostel-room.dto';
+import { CreateHostelCategoryDto } from './dto/create-hostel-category.dto';
+import { AllocateStudentDto } from './dto/allocate-student.dto';
 
 @Injectable()
 export class HostelService {
@@ -20,7 +24,7 @@ export class HostelService {
     private readonly allocationRepo: Repository<HostelAllocation>,
   ) {}
 
-  async createHostel(dto: Partial<Hostel>): Promise<Hostel> {
+  async createHostel(dto: CreateHostelDto): Promise<Hostel> {
     return this.hostelRepo.save(this.hostelRepo.create(dto));
   }
 
@@ -35,7 +39,7 @@ export class HostelService {
     return hostel;
   }
 
-  async updateHostel(id: number, dto: Partial<Hostel>): Promise<Hostel> {
+  async updateHostel(id: number, dto: Partial<CreateHostelDto>): Promise<Hostel> {
     const hostel = await this.findHostel(id);
     Object.assign(hostel, dto);
     return this.hostelRepo.save(hostel);
@@ -46,7 +50,7 @@ export class HostelService {
     await this.hostelRepo.remove(hostel);
   }
 
-  async createRoom(dto: Partial<HostelRoom>): Promise<HostelRoom> {
+  async createRoom(dto: CreateHostelRoomDto): Promise<HostelRoom> {
     return this.roomRepo.save(this.roomRepo.create(dto));
   }
 
@@ -63,7 +67,7 @@ export class HostelService {
     return room;
   }
 
-  async updateRoom(id: number, dto: Partial<HostelRoom>): Promise<HostelRoom> {
+  async updateRoom(id: number, dto: Partial<CreateHostelRoomDto>): Promise<HostelRoom> {
     const room = await this.findRoom(id);
     Object.assign(room, dto);
     return this.roomRepo.save(room);
@@ -74,8 +78,7 @@ export class HostelService {
     await this.roomRepo.remove(room);
   }
 
-  // Categories
-  createCategory(dto: any) {
+  createCategory(dto: CreateHostelCategoryDto) {
     return this.categoryRepo.save(this.categoryRepo.create(dto));
   }
 
@@ -89,8 +92,7 @@ export class HostelService {
     return this.categoryRepo.remove(c);
   }
 
-  // Allocations
-  allocate(dto: any) {
+  allocate(dto: AllocateStudentDto) {
     return this.allocationRepo.save(this.allocationRepo.create(dto));
   }
 

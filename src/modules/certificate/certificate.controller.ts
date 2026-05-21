@@ -27,6 +27,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/roles.enum';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
+import { CreateCertificateTemplateDto } from './dto/create-certificate-template.dto';
 
 @ApiTags('Certificates & Cards')
 @ApiBearerAuth('access-token')
@@ -39,21 +40,8 @@ export class CertificateController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Template created')
   @ApiOperation({ summary: 'Create a certificate/ID card/admit card template' })
-  @ApiBody({
-    schema: {
-      properties: {
-        title: { type: 'string', example: 'Merit Certificate' },
-        type: {
-          type: 'string',
-          enum: ['certificate', 'id_card', 'admit_card'],
-        },
-        content: { type: 'string', example: '<html>...</html>' },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['title', 'type'],
-    },
-  })
-  createTemplate(@Body() dto: any) {
+  @ApiBody({ type: CreateCertificateTemplateDto })
+  createTemplate(@Body() dto: CreateCertificateTemplateDto) {
     return this.service.createTemplate(dto);
   }
 
@@ -90,7 +78,8 @@ export class CertificateController {
   @ForgeMessage('Template updated')
   @ApiOperation({ summary: 'Update a certificate template' })
   @ApiParam({ name: 'id', type: Number })
-  updateTemplate(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateCertificateTemplateDto })
+  updateTemplate(@Param('id', ParseIntIdPipe) id: number, @Body() dto: CreateCertificateTemplateDto) {
     return this.service.updateTemplate(id, dto);
   }
 

@@ -4,6 +4,9 @@ import { Repository } from 'typeorm';
 import { NotFoundException } from 'nestjs-api-forge';
 import { Homework } from './entities/homework.entity';
 import { HomeworkSubmission } from './entities/homework-submission.entity';
+import { CreateHomeworkDto } from './dto/create-homework.dto';
+import { SubmitHomeworkDto } from './dto/submit-homework.dto';
+import { EvaluateSubmissionDto } from './dto/evaluate-submission.dto';
 
 @Injectable()
 export class HomeworkService {
@@ -13,7 +16,7 @@ export class HomeworkService {
     private submissionRepo: Repository<HomeworkSubmission>,
   ) {}
 
-  createHomework(dto: any, teacherId: number) {
+  createHomework(dto: CreateHomeworkDto, teacherId: number) {
     return this.homeworkRepo.save(
       this.homeworkRepo.create({ ...dto, teacherId }),
     );
@@ -42,7 +45,7 @@ export class HomeworkService {
     return qb.getMany();
   }
 
-  async updateHomework(id: number, dto: any) {
+  async updateHomework(id: number, dto: Partial<CreateHomeworkDto>) {
     const hw = await this.homeworkRepo.findOneBy({ id });
     if (!hw) throw new NotFoundException('Homework not found');
     return this.homeworkRepo.save({ ...hw, ...dto });
@@ -54,7 +57,7 @@ export class HomeworkService {
     return this.homeworkRepo.remove(hw);
   }
 
-  submitHomework(dto: any, studentId: number) {
+  submitHomework(dto: SubmitHomeworkDto, studentId: number) {
     return this.submissionRepo.save(
       this.submissionRepo.create({ ...dto, studentId }),
     );
@@ -75,7 +78,7 @@ export class HomeworkService {
 
   async evaluateSubmission(
     id: number,
-    dto: { obtainedMarks?: number; feedback?: string },
+    dto: EvaluateSubmissionDto,
     evaluatedBy: number,
   ) {
     const sub = await this.submissionRepo.findOneBy({ id });

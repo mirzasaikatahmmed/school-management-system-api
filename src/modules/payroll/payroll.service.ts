@@ -5,6 +5,10 @@ import { NotFoundException } from 'nestjs-api-forge';
 import { SalaryTemplate } from './entities/salary-template.entity';
 import { SalaryTemplateDetail } from './entities/salary-template-detail.entity';
 import { Payroll } from './entities/payroll.entity';
+import { CreateSalaryTemplateDto } from './dto/create-salary-template.dto';
+import { AddTemplateDetailDto } from './dto/add-template-detail.dto';
+import { GeneratePayrollDto } from './dto/generate-payroll.dto';
+import { PayPayrollDto } from './dto/pay-payroll.dto';
 
 @Injectable()
 export class PayrollService {
@@ -17,7 +21,7 @@ export class PayrollService {
   ) {}
 
   // Salary Templates
-  createTemplate(dto: any) {
+  createTemplate(dto: CreateSalaryTemplateDto) {
     return this.templateRepo.save(this.templateRepo.create(dto));
   }
 
@@ -25,7 +29,7 @@ export class PayrollService {
     return this.templateRepo.find({ where: branchId ? { branchId } : {} });
   }
 
-  async updateTemplate(id: number, dto: any) {
+  async updateTemplate(id: number, dto: Partial<CreateSalaryTemplateDto>) {
     const t = await this.templateRepo.findOneBy({ id });
     if (!t) throw new NotFoundException('Template not found');
     return this.templateRepo.save({ ...t, ...dto });
@@ -38,7 +42,7 @@ export class PayrollService {
   }
 
   // Template Details
-  addTemplateDetail(dto: any) {
+  addTemplateDetail(dto: AddTemplateDetailDto) {
     return this.detailRepo.save(this.detailRepo.create(dto));
   }
 
@@ -53,7 +57,7 @@ export class PayrollService {
   }
 
   // Payroll
-  async generatePayroll(dto: any) {
+  async generatePayroll(dto: GeneratePayrollDto) {
     const existing = await this.payrollRepo.findOne({
       where: { staffId: dto.staffId, month: dto.month, year: dto.year },
     });
@@ -84,7 +88,7 @@ export class PayrollService {
     return qb.getMany();
   }
 
-  async payPayroll(id: number, dto: any) {
+  async payPayroll(id: number, dto: PayPayrollDto) {
     const payroll = await this.payrollRepo.findOneBy({ id });
     if (!payroll) throw new NotFoundException('Payroll record not found');
     return this.payrollRepo.save({

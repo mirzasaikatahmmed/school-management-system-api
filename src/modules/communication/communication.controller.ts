@@ -28,6 +28,8 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/roles.enum';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
+import { CreateEventDto } from './dto/create-event.dto';
+import { SendMessageDto } from './dto/send-message.dto';
 
 @ApiTags('Communication')
 @ApiBearerAuth('access-token')
@@ -40,23 +42,8 @@ export class CommunicationController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Event created')
   @ApiOperation({ summary: 'Create a school event' })
-  @ApiBody({
-    schema: {
-      properties: {
-        title: { type: 'string', example: 'Annual Sports Day' },
-        eventTypeId: { type: 'number', example: 1 },
-        fromDate: { type: 'string', example: '2025-12-10' },
-        toDate: { type: 'string', example: '2025-12-11' },
-        fromTime: { type: 'string', example: '09:00' },
-        toTime: { type: 'string', example: '17:00' },
-        note: { type: 'string' },
-        branchId: { type: 'number', example: 1 },
-        sessionId: { type: 'number', example: 6 },
-      },
-      required: ['title', 'eventTypeId', 'fromDate', 'toDate'],
-    },
-  })
-  createEvent(@Body() dto: any) {
+  @ApiBody({ type: CreateEventDto })
+  createEvent(@Body() dto: CreateEventDto) {
     return this.service.createEvent(dto);
   }
 
@@ -88,7 +75,8 @@ export class CommunicationController {
   @ForgeMessage('Event updated')
   @ApiOperation({ summary: 'Update an event' })
   @ApiParam({ name: 'id', type: Number })
-  updateEvent(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateEventDto })
+  updateEvent(@Param('id', ParseIntIdPipe) id: number, @Body() dto: CreateEventDto) {
     return this.service.updateEvent(id, dto);
   }
 
@@ -105,21 +93,8 @@ export class CommunicationController {
   @Post('messages')
   @ForgeMessage('Message sent')
   @ApiOperation({ summary: 'Send an internal message' })
-  @ApiBody({
-    schema: {
-      properties: {
-        receiverId: { type: 'number', example: 2 },
-        subject: { type: 'string', example: 'Meeting tomorrow' },
-        message: {
-          type: 'string',
-          example: 'Please join the staff meeting at 10am.',
-        },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['receiverId', 'message'],
-    },
-  })
-  sendMessage(@Body() dto: any, @CurrentUser() user: any) {
+  @ApiBody({ type: SendMessageDto })
+  sendMessage(@Body() dto: SendMessageDto, @CurrentUser() user: any) {
     return this.service.sendMessage({ ...dto, senderId: user.id });
   }
 

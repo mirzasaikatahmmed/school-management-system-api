@@ -27,6 +27,10 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/roles.enum';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
+import { CreateTransportRouteDto } from './dto/create-transport-route.dto';
+import { CreateVehicleDto } from './dto/create-vehicle.dto';
+import { CreateStoppageDto } from './dto/create-stoppage.dto';
+import { AssignStudentDto } from './dto/assign-student.dto';
 
 @ApiTags('Transport')
 @ApiBearerAuth('access-token')
@@ -39,19 +43,8 @@ export class TransportController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Route created')
   @ApiOperation({ summary: 'Create a transport route' })
-  @ApiBody({
-    schema: {
-      properties: {
-        name: { type: 'string', example: 'Bera – Pabna' },
-        startPlace: { type: 'string', example: 'Bera' },
-        stopPlace: { type: 'string', example: 'Pabna' },
-        remarks: { type: 'string' },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['name', 'startPlace', 'stopPlace'],
-    },
-  })
-  createRoute(@Body() dto: any) {
+  @ApiBody({ type: CreateTransportRouteDto })
+  createRoute(@Body() dto: CreateTransportRouteDto) {
     return this.transportService.createRoute(dto);
   }
 
@@ -68,7 +61,11 @@ export class TransportController {
   @ForgeMessage('Route updated')
   @ApiOperation({ summary: 'Update a route' })
   @ApiParam({ name: 'id', type: Number })
-  updateRoute(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateTransportRouteDto })
+  updateRoute(
+    @Param('id', ParseIntIdPipe) id: number,
+    @Body() dto: CreateTransportRouteDto,
+  ) {
     return this.transportService.updateRoute(id, dto);
   }
 
@@ -86,28 +83,8 @@ export class TransportController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Vehicle created')
   @ApiOperation({ summary: 'Add a vehicle' })
-  @ApiBody({
-    schema: {
-      properties: {
-        vehicleNo: { type: 'string', example: 'Dhaka Metro Ga-11-1234' },
-        capacity: { type: 'string', example: '40' },
-        driverName: { type: 'string', example: 'Karim' },
-        driverPhone: { type: 'string', example: '01711223344' },
-        driverLicense: { type: 'string', example: 'DL-00123' },
-        insuranceRenewal: { type: 'string', example: '2026-01-01' },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: [
-        'vehicleNo',
-        'capacity',
-        'driverName',
-        'driverPhone',
-        'driverLicense',
-        'insuranceRenewal',
-      ],
-    },
-  })
-  createVehicle(@Body() dto: any) {
+  @ApiBody({ type: CreateVehicleDto })
+  createVehicle(@Body() dto: CreateVehicleDto) {
     return this.transportService.createVehicle(dto);
   }
 
@@ -124,7 +101,11 @@ export class TransportController {
   @ForgeMessage('Vehicle updated')
   @ApiOperation({ summary: 'Update a vehicle' })
   @ApiParam({ name: 'id', type: Number })
-  updateVehicle(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateVehicleDto })
+  updateVehicle(
+    @Param('id', ParseIntIdPipe) id: number,
+    @Body() dto: CreateVehicleDto,
+  ) {
     return this.transportService.updateVehicle(id, dto);
   }
 
@@ -142,20 +123,8 @@ export class TransportController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Stoppage created')
   @ApiOperation({ summary: 'Add a stoppage to a route' })
-  @ApiBody({
-    schema: {
-      properties: {
-        name: { type: 'string', example: 'City Gate' },
-        routeId: { type: 'number', example: 1 },
-        pickupTime: { type: 'string', example: '07:30' },
-        dropTime: { type: 'string', example: '16:00' },
-        monthlyFee: { type: 'number', example: 500 },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['name', 'routeId'],
-    },
-  })
-  createStoppage(@Body() dto: any) {
+  @ApiBody({ type: CreateStoppageDto })
+  createStoppage(@Body() dto: CreateStoppageDto) {
     return this.transportService.createStoppage(dto);
   }
 
@@ -179,7 +148,11 @@ export class TransportController {
   @ForgeMessage('Stoppage updated')
   @ApiOperation({ summary: 'Update a stoppage' })
   @ApiParam({ name: 'id', type: Number })
-  updateStoppage(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateStoppageDto })
+  updateStoppage(
+    @Param('id', ParseIntIdPipe) id: number,
+    @Body() dto: CreateStoppageDto,
+  ) {
     return this.transportService.updateStoppage(id, dto);
   }
 
@@ -197,20 +170,8 @@ export class TransportController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Student assigned to transport')
   @ApiOperation({ summary: 'Assign a student to a transport route' })
-  @ApiBody({
-    schema: {
-      properties: {
-        studentId: { type: 'number', example: 5 },
-        routeId: { type: 'number', example: 1 },
-        stoppageId: { type: 'number', example: 2 },
-        vehicleId: { type: 'number', example: 1 },
-        sessionId: { type: 'number', example: 6 },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['studentId', 'routeId'],
-    },
-  })
-  assignStudent(@Body() dto: any) {
+  @ApiBody({ type: AssignStudentDto })
+  assignStudent(@Body() dto: AssignStudentDto) {
     return this.transportService.assignStudent(dto);
   }
 

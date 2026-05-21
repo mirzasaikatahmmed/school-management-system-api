@@ -28,6 +28,9 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { Role } from '../../common/constants/roles.enum';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { ParseIntIdPipe } from '../../common/pipes/parse-int-id.pipe';
+import { CreateLeaveCategoryDto } from './dto/create-leave-category.dto';
+import { ApplyLeaveDto } from './dto/apply-leave.dto';
+import { RejectLeaveDto } from './dto/reject-leave.dto';
 
 @ApiTags('Leave')
 @ApiBearerAuth('access-token')
@@ -40,17 +43,8 @@ export class LeaveController {
   @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @ForgeMessage('Leave category created')
   @ApiOperation({ summary: 'Create a leave category' })
-  @ApiBody({
-    schema: {
-      properties: {
-        name: { type: 'string', example: 'Casual Leave' },
-        totalDays: { type: 'number', example: 10 },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['name', 'totalDays'],
-    },
-  })
-  createCategory(@Body() dto: any) {
+  @ApiBody({ type: CreateLeaveCategoryDto })
+  createCategory(@Body() dto: CreateLeaveCategoryDto) {
     return this.service.createCategory(dto);
   }
 
@@ -67,7 +61,11 @@ export class LeaveController {
   @ForgeMessage('Leave category updated')
   @ApiOperation({ summary: 'Update leave category' })
   @ApiParam({ name: 'id', type: Number })
-  updateCategory(@Param('id', ParseIntIdPipe) id: number, @Body() dto: any) {
+  @ApiBody({ type: CreateLeaveCategoryDto })
+  updateCategory(
+    @Param('id', ParseIntIdPipe) id: number,
+    @Body() dto: CreateLeaveCategoryDto,
+  ) {
     return this.service.updateCategory(id, dto);
   }
 
@@ -84,20 +82,8 @@ export class LeaveController {
   @Post('apply')
   @ForgeMessage('Leave application submitted')
   @ApiOperation({ summary: 'Apply for leave' })
-  @ApiBody({
-    schema: {
-      properties: {
-        leaveCategoryId: { type: 'number', example: 1 },
-        fromDate: { type: 'string', example: '2025-06-01' },
-        toDate: { type: 'string', example: '2025-06-03' },
-        totalDays: { type: 'number', example: 3 },
-        reason: { type: 'string', example: 'Personal' },
-        branchId: { type: 'number', example: 1 },
-      },
-      required: ['leaveCategoryId', 'fromDate', 'toDate', 'totalDays'],
-    },
-  })
-  applyLeave(@Body() dto: any, @CurrentUser() user: any) {
+  @ApiBody({ type: ApplyLeaveDto })
+  applyLeave(@Body() dto: ApplyLeaveDto, @CurrentUser() user: any) {
     return this.service.applyLeave(dto, user.id);
   }
 
@@ -141,19 +127,10 @@ export class LeaveController {
   @ForgeMessage('Leave rejected')
   @ApiOperation({ summary: 'Reject a leave application' })
   @ApiParam({ name: 'id', type: Number })
-  @ApiBody({
-    schema: {
-      properties: {
-        rejectionReason: {
-          type: 'string',
-          example: 'Insufficient leave balance',
-        },
-      },
-    },
-  })
+  @ApiBody({ type: RejectLeaveDto })
   rejectLeave(
     @Param('id', ParseIntIdPipe) id: number,
-    @Body() body: any,
+    @Body() body: RejectLeaveDto,
     @CurrentUser() user: any,
   ) {
     return this.service.rejectLeave(id, body.rejectionReason, user.id);

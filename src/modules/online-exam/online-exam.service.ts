@@ -5,6 +5,9 @@ import { NotFoundException } from 'nestjs-api-forge';
 import { OnlineExamQuestion } from './entities/online-exam-question.entity';
 import { OnlineExamSession } from './entities/online-exam-session.entity';
 import { OnlineExamSubmission } from './entities/online-exam-submission.entity';
+import { CreateQuestionDto } from './dto/create-question.dto';
+import { CreateExamSessionDto } from './dto/create-exam-session.dto';
+import { SubmitExamDto } from './dto/submit-exam.dto';
 
 @Injectable()
 export class OnlineExamService {
@@ -18,7 +21,7 @@ export class OnlineExamService {
   ) {}
 
   // Questions
-  createQuestion(dto: any) {
+  createQuestion(dto: CreateQuestionDto) {
     return this.questionRepo.save(this.questionRepo.create(dto));
   }
 
@@ -39,7 +42,7 @@ export class OnlineExamService {
     return qb.getMany();
   }
 
-  async updateQuestion(id: number, dto: any) {
+  async updateQuestion(id: number, dto: Partial<CreateQuestionDto>) {
     const q = await this.questionRepo.findOneBy({ id });
     if (!q) throw new NotFoundException('Question not found');
     return this.questionRepo.save({ ...q, ...dto });
@@ -52,7 +55,7 @@ export class OnlineExamService {
   }
 
   // Sessions
-  createSession(dto: any) {
+  createSession(dto: CreateExamSessionDto) {
     return this.sessionRepo.save(this.sessionRepo.create(dto));
   }
 
@@ -73,7 +76,7 @@ export class OnlineExamService {
     return qb.getMany();
   }
 
-  async updateSession(id: number, dto: any) {
+  async updateSession(id: number, dto: Partial<CreateExamSessionDto>) {
     const s = await this.sessionRepo.findOneBy({ id });
     if (!s) throw new NotFoundException('Exam session not found');
     return this.sessionRepo.save({ ...s, ...dto });
@@ -86,12 +89,7 @@ export class OnlineExamService {
   }
 
   // Submissions
-  async submitExam(dto: {
-    examSessionId: number;
-    studentId: number;
-    answers: Record<string, string>;
-    branchId?: number;
-  }) {
+  async submitExam(dto: SubmitExamDto & { studentId: number }) {
     const session = await this.sessionRepo.findOneBy({ id: dto.examSessionId });
     if (!session) throw new NotFoundException('Exam session not found');
 

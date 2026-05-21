@@ -5,8 +5,11 @@ import {
   Body,
   Patch,
   Param,
+  Delete,
   UseGuards,
   Query,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -14,6 +17,8 @@ import {
   ApiBearerAuth,
   ApiParam,
   ApiQuery,
+  ApiBody,
+  ApiResponse,
 } from '@nestjs/swagger';
 import { ForgeMessage } from 'nestjs-api-forge';
 import { ExamService } from './exam.service';
@@ -23,6 +28,7 @@ import {
   CreateGradeDto,
   SubmitMarkDto,
 } from './dto/create-exam.dto';
+import { CreateExamHallDto } from './dto/create-exam-hall.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -152,5 +158,43 @@ export class ExamController {
       sessionId: sessionId ? +sessionId : undefined,
       branchId: branchId ? +branchId : undefined,
     });
+  }
+
+  // Exam Halls
+  @Post('halls')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  @ForgeMessage('Exam hall created')
+  @ApiOperation({ summary: 'Create an exam hall' })
+  @ApiBody({ type: CreateExamHallDto })
+  createHall(@Body() dto: CreateExamHallDto) {
+    return this.examService.createHall(dto);
+  }
+
+  @Get('halls')
+  @ForgeMessage('Exam halls fetched')
+  @ApiOperation({ summary: 'List exam halls' })
+  @ApiQuery({ name: 'branchId', required: false, type: Number })
+  getHalls(@Query('branchId') branchId?: string) {
+    return this.examService.getHalls(branchId ? +branchId : undefined);
+  }
+
+  @Patch('halls/:id')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  @ForgeMessage('Exam hall updated')
+  @ApiOperation({ summary: 'Update an exam hall' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiBody({ type: CreateExamHallDto })
+  updateHall(@Param('id', ParseIntIdPipe) id: number, @Body() dto: CreateExamHallDto) {
+    return this.examService.updateHall(id, dto);
+  }
+
+  @Delete('halls/:id')
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete an exam hall' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: 204 })
+  removeHall(@Param('id', ParseIntIdPipe) id: number) {
+    return this.examService.removeHall(id);
   }
 }

@@ -5,6 +5,9 @@ import { NotFoundException, BadRequestException } from 'nestjs-api-forge';
 import { Product } from './entities/product.entity';
 import { InventoryCategory } from './entities/inventory-category.entity';
 import { StockIssue } from './entities/stock-issue.entity';
+import { CreateInventoryCategoryDto } from './dto/create-inventory-category.dto';
+import { CreateProductDto } from './dto/create-product.dto';
+import { IssueStockDto } from './dto/issue-stock.dto';
 
 @Injectable()
 export class InventoryService {
@@ -15,8 +18,7 @@ export class InventoryService {
     @InjectRepository(StockIssue) private issueRepo: Repository<StockIssue>,
   ) {}
 
-  // Categories
-  createCategory(dto: any) {
+  createCategory(dto: CreateInventoryCategoryDto) {
     return this.categoryRepo.save(this.categoryRepo.create(dto));
   }
 
@@ -30,8 +32,7 @@ export class InventoryService {
     return this.categoryRepo.remove(c);
   }
 
-  // Products
-  createProduct(dto: any) {
+  createProduct(dto: CreateProductDto) {
     return this.productRepo.save(this.productRepo.create(dto));
   }
 
@@ -46,7 +47,7 @@ export class InventoryService {
     return qb.getMany();
   }
 
-  async updateProduct(id: number, dto: any) {
+  async updateProduct(id: number, dto: Partial<CreateProductDto>) {
     const p = await this.productRepo.findOneBy({ id });
     if (!p) throw new NotFoundException('Product not found');
     return this.productRepo.save({ ...p, ...dto });
@@ -58,7 +59,6 @@ export class InventoryService {
     return this.productRepo.remove(p);
   }
 
-  // Stock Purchase (add stock)
   async addStock(productId: number, quantity: number) {
     const p = await this.productRepo.findOneBy({ id: productId });
     if (!p) throw new NotFoundException('Product not found');
@@ -66,8 +66,7 @@ export class InventoryService {
     return this.productRepo.save(p);
   }
 
-  // Stock Issue
-  async issueStock(dto: any, issuedBy: number) {
+  async issueStock(dto: IssueStockDto, issuedBy: number) {
     const p = await this.productRepo.findOneBy({ id: dto.productId });
     if (!p) throw new NotFoundException('Product not found');
     if (p.currentStock < dto.quantity)

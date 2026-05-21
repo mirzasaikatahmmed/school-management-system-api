@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotFoundException } from 'nestjs-api-forge';
 import { CertificateTemplate } from './entities/certificate-template.entity';
+import { CreateCertificateTemplateDto } from './dto/create-certificate-template.dto';
 
 @Injectable()
 export class CertificateService {
@@ -11,7 +12,7 @@ export class CertificateService {
     private templateRepo: Repository<CertificateTemplate>,
   ) {}
 
-  createTemplate(dto: any) {
+  createTemplate(dto: CreateCertificateTemplateDto) {
     return this.templateRepo.save(this.templateRepo.create(dto));
   }
 
@@ -29,7 +30,7 @@ export class CertificateService {
     return t;
   }
 
-  async updateTemplate(id: number, dto: any) {
+  async updateTemplate(id: number, dto: Partial<CreateCertificateTemplateDto>) {
     const t = await this.findTemplate(id);
     return this.templateRepo.save({ ...t, ...dto });
   }

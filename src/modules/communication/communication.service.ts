@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { NotFoundException } from 'nestjs-api-forge';
 import { Event } from './entities/event.entity';
 import { Message } from './entities/message.entity';
+import { CreateEventDto } from './dto/create-event.dto';
+import { SendMessageDto } from './dto/send-message.dto';
 
 @Injectable()
 export class CommunicationService {
@@ -14,7 +16,7 @@ export class CommunicationService {
     private readonly messageRepo: Repository<Message>,
   ) {}
 
-  async createEvent(dto: Partial<Event>): Promise<Event> {
+  async createEvent(dto: CreateEventDto): Promise<Event> {
     return this.eventRepo.save(this.eventRepo.create(dto));
   }
 
@@ -31,7 +33,7 @@ export class CommunicationService {
     return event;
   }
 
-  async updateEvent(id: number, dto: Partial<Event>): Promise<Event> {
+  async updateEvent(id: number, dto: Partial<CreateEventDto>): Promise<Event> {
     const event = await this.findEvent(id);
     Object.assign(event, dto);
     return this.eventRepo.save(event);
@@ -42,7 +44,7 @@ export class CommunicationService {
     await this.eventRepo.remove(event);
   }
 
-  async sendMessage(dto: Partial<Message>): Promise<Message> {
+  async sendMessage(dto: SendMessageDto & { senderId: number }): Promise<Message> {
     return this.messageRepo.save(this.messageRepo.create(dto));
   }
 

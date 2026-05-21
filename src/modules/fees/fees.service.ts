@@ -6,10 +6,14 @@ import { FeesType } from './entities/fees-type.entity';
 import { FeeGroup } from './entities/fee-group.entity';
 import { FeeAllocation } from './entities/fee-allocation.entity';
 import { FeePaymentHistory } from './entities/fee-payment-history.entity';
+import { FeeFine } from './entities/fee-fine.entity';
 import {
   CreateFeeAllocationDto,
   CollectPaymentDto,
 } from './dto/create-payment.dto';
+import { CreateFeeTypeDto } from './dto/create-fee-type.dto';
+import { CreateFeeGroupDto } from './dto/create-fee-group.dto';
+import { CreateFeeFineDto } from './dto/create-fee-fine.dto';
 
 @Injectable()
 export class FeesService {
@@ -22,6 +26,8 @@ export class FeesService {
     private readonly allocationRepo: Repository<FeeAllocation>,
     @InjectRepository(FeePaymentHistory)
     private readonly paymentRepo: Repository<FeePaymentHistory>,
+    @InjectRepository(FeeFine)
+    private readonly feeFineRepo: Repository<FeeFine>,
   ) {}
 
   async getFeeTypes(branchId?: number): Promise<FeesType[]> {
@@ -29,12 +35,7 @@ export class FeesService {
     return this.feesTypeRepo.find({ where });
   }
 
-  async createFeeType(dto: {
-    name: string;
-    feeCode: string;
-    description?: string;
-    branchId: number;
-  }): Promise<FeesType> {
+  async createFeeType(dto: CreateFeeTypeDto): Promise<FeesType> {
     return this.feesTypeRepo.save(this.feesTypeRepo.create(dto));
   }
 
@@ -48,12 +49,7 @@ export class FeesService {
     return this.feeGroupRepo.find({ where });
   }
 
-  async createFeeGroup(dto: {
-    name: string;
-    description?: string;
-    sessionId: number;
-    branchId: number;
-  }): Promise<FeeGroup> {
+  async createFeeGroup(dto: CreateFeeGroupDto): Promise<FeeGroup> {
     return this.feeGroupRepo.save(this.feeGroupRepo.create(dto));
   }
 
@@ -93,6 +89,25 @@ export class FeesService {
       where: { allocationId },
       order: { date: 'DESC' },
     });
+  }
+
+  // Fee Fines
+  createFeeFine(dto: CreateFeeFineDto): Promise<FeeFine> {
+    return this.feeFineRepo.save(this.feeFineRepo.create(dto));
+  }
+
+  getFeeFines(filters: { groupId?: number; sessionId?: number; branchId?: number }): Promise<FeeFine[]> {
+    const where: any = {};
+    if (filters.groupId) where.groupId = filters.groupId;
+    if (filters.sessionId) where.sessionId = filters.sessionId;
+    if (filters.branchId) where.branchId = filters.branchId;
+    return this.feeFineRepo.find({ where });
+  }
+
+  async removeFeeFine(id: number): Promise<void> {
+    const fine = await this.feeFineRepo.findOneBy({ id });
+    if (!fine) throw new NotFoundException('Fee fine not found');
+    await this.feeFineRepo.remove(fine);
   }
 
   async getStudentFeeStatement(

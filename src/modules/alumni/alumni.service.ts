@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotFoundException } from 'nestjs-api-forge';
 import { Alumni } from './entities/alumni.entity';
+import { CreateAlumniDto } from './dto/create-alumni.dto';
 
 @Injectable()
 export class AlumniService {
@@ -10,7 +11,7 @@ export class AlumniService {
     @InjectRepository(Alumni) private alumniRepo: Repository<Alumni>,
   ) {}
 
-  create(dto: any) {
+  create(dto: CreateAlumniDto) {
     return this.alumniRepo.save(this.alumniRepo.create(dto));
   }
 
@@ -34,7 +35,7 @@ export class AlumniService {
     return a;
   }
 
-  async update(id: number, dto: any) {
+  async update(id: number, dto: Partial<CreateAlumniDto>) {
     const a = await this.findOne(id);
     return this.alumniRepo.save({ ...a, ...dto });
   }
